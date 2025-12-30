@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../theme/app_theme.dart';
 
 class PermissionService {
   static const _permissionChannel = MethodChannel('nutrix/permissions');
@@ -7,7 +8,9 @@ class PermissionService {
   /// Request camera permission
   static Future<PermissionStatus> requestCameraPermission() async {
     try {
-      final result = await _permissionChannel.invokeMethod('requestCameraPermission');
+      final result = await _permissionChannel.invokeMethod(
+        'requestCameraPermission',
+      );
       return _parsePermissionStatus(result);
     } on PlatformException catch (e) {
       debugPrint('Error requesting camera permission: ${e.message}');
@@ -18,7 +21,9 @@ class PermissionService {
   /// Check current camera permission status
   static Future<PermissionStatus> checkCameraPermission() async {
     try {
-      final result = await _permissionChannel.invokeMethod('checkCameraPermission');
+      final result = await _permissionChannel.invokeMethod(
+        'checkCameraPermission',
+      );
       return _parsePermissionStatus(result);
     } on PlatformException catch (e) {
       debugPrint('Error checking camera permission: ${e.message}');
@@ -70,17 +75,11 @@ class PermissionService {
           ),
           title: Text(
             title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           content: Text(
             message,
-            style: const TextStyle(
-              fontSize: 14,
-              height: 1.4,
-            ),
+            style: const TextStyle(fontSize: 14, height: 1.4),
           ),
           actions: [
             TextButton(
@@ -96,7 +95,7 @@ class PermissionService {
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2ECC71),
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -117,10 +116,12 @@ class PermissionService {
   }
 
   /// Handle camera permission request with UI feedback
-  static Future<bool> handleCameraPermissionRequest(BuildContext context) async {
+  static Future<bool> handleCameraPermissionRequest(
+    BuildContext context,
+  ) async {
     // First check current permission status
     final currentStatus = await checkCameraPermission();
-    
+
     if (currentStatus == PermissionStatus.granted) {
       return true;
     }
@@ -130,7 +131,8 @@ class PermissionService {
       final shouldRequest = await showPermissionDialog(
         context: context,
         title: 'Izin Kamera Diperlukan',
-        message: 'Aplikasi Nutrix memerlukan akses kamera untuk mendeteksi makanan secara otomatis. Fitur ini akan membantu Anda mencatat kalori dengan lebih mudah.',
+        message:
+            'Aplikasi Nutrix memerlukan akses kamera untuk mendeteksi makanan secara otomatis. Fitur ini akan membantu Anda mencatat kalori dengan lebih mudah.',
         positiveButtonText: 'Izinkan Kamera',
         negativeButtonText: 'Tidak Sekarang',
       );
@@ -149,7 +151,8 @@ class PermissionService {
       final shouldOpenSettings = await showPermissionDialog(
         context: context,
         title: 'Izin Kamera Diblokir',
-        message: 'Akses kamera telah diblokir. Untuk menggunakan fitur deteksi makanan, silakan buka pengaturan aplikasi dan izinkan akses kamera.',
+        message:
+            'Akses kamera telah diblokir. Untuk menggunakan fitur deteksi makanan, silakan buka pengaturan aplikasi dan izinkan akses kamera.',
         positiveButtonText: 'Buka Pengaturan',
         negativeButtonText: 'Nanti Saja',
       );
@@ -164,9 +167,4 @@ class PermissionService {
   }
 }
 
-enum PermissionStatus {
-  granted,
-  denied,
-  permanentlyDenied,
-  restricted,
-}
+enum PermissionStatus { granted, denied, permanentlyDenied, restricted }

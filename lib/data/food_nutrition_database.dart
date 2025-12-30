@@ -255,10 +255,95 @@ class FoodNutritionDatabase {
       servingSize: '1 plate (200g)',
       category: 'Snack',
     ),
+    // Extended entries (common foods / synonyms)
+    'mango': FoodNutrition(
+      name: 'Mango',
+      calories: 60,
+      protein: 0.8,
+      carbs: 15.0,
+      fat: 0.4,
+      fiber: 1.6,
+      servingSize: '100g',
+      category: 'Fruit',
+    ),
+    'banana': FoodNutrition(
+      name: 'Banana',
+      calories: 89,
+      protein: 1.1,
+      carbs: 23.0,
+      fat: 0.3,
+      fiber: 2.6,
+      servingSize: '100g',
+      category: 'Fruit',
+    ),
+    'pepperoni': FoodNutrition(
+      name: 'Pepperoni',
+      calories: 494,
+      protein: 23.0,
+      carbs: 4.0,
+      fat: 44.0,
+      fiber: 0.0,
+      servingSize: '100g',
+      category: 'Meat',
+    ),
+    'salad': FoodNutrition(
+      name: 'Salad',
+      calories: 33,
+      protein: 2.0,
+      carbs: 7.0,
+      fat: 0.3,
+      fiber: 2.0,
+      servingSize: '100g (mixed greens)',
+      category: 'Vegetable',
+    ),
+  };
+
+  static final Map<String, String> _synonyms = {
+    'bell_pepper': 'pepperoni', // example mapping (adjust if needed)
+    'red_pepper': 'pepperoni',
+    'green_pepper': 'pepperoni',
+    'paprika': 'pepperoni',
+    'mangga': 'mango',
   };
 
   static FoodNutrition? getNutrition(String foodName) {
-    final key = foodName.toLowerCase().replaceAll(RegExp(r"[^a-z0-9_]"), "_");
-    return _database[key];
+    String base = foodName.toLowerCase().trim();
+    base = base.replaceAll(RegExp(r'[^a-z0-9 ]'), ' ');
+    base = base.replaceAll(RegExp(r'\s+'), ' ');
+    // plural simplifications
+    if (base.endsWith('es') && base.length > 4) {
+      base = base.substring(0, base.length - 2);
+    } else if (base.endsWith('s') && base.length > 3) {
+      base = base.substring(0, base.length - 1);
+    }
+    final key = base.replaceAll(' ', '_');
+    if (_database.containsKey(key)) return _database[key];
+    final alt = _synonyms[key];
+    if (alt != null && _database.containsKey(alt)) return _database[alt];
+    return null;
+  }
+
+  /// Tambahkan entri nutrisi dinamis (misal dari API). Override jika sudah ada.
+  static void addDynamic(String rawName, Map<String, dynamic> data) {
+    final nut = FoodNutrition(
+      name: rawName,
+      calories: (data['calories'] as num?)?.round() ?? 0,
+      protein: (data['protein'] as num?)?.toDouble() ?? 0.0,
+      carbs: (data['carbs'] as num?)?.toDouble() ?? 0.0,
+      fat: (data['fat'] as num?)?.toDouble() ?? 0.0,
+      fiber: 0.0,
+      servingSize: '100g',
+      category: 'API',
+    );
+    String key = rawName.toLowerCase().trim();
+    key = key.replaceAll(RegExp(r'[^a-z0-9 ]'), ' ');
+    key = key.replaceAll(RegExp(r'\s+'), ' ');
+    if (key.endsWith('es') && key.length > 4) {
+      key = key.substring(0, key.length - 2);
+    } else if (key.endsWith('s') && key.length > 3) {
+      key = key.substring(0, key.length - 1);
+    }
+    key = key.replaceAll(' ', '_');
+    _database[key] = nut;
   }
 }

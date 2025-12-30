@@ -228,6 +228,55 @@ class UserDataService extends ChangeNotifier {
       totalFat: totalFat ~/ daysWithData,
     );
   }
+  
+  // Daily Notes Management
+  final Map<String, Map<String, String>> _dailyNotes = {};
+  
+  // Save daily notes
+  void saveDailyNotes(String userId, DateTime date, String notes) {
+    if (!_dailyNotes.containsKey(userId)) {
+      _dailyNotes[userId] = {};
+    }
+    final dateKey = '${date.year}-${date.month}-${date.day}';
+    _dailyNotes[userId]![dateKey] = notes;
+    notifyListeners();
+  }
+  
+  // Get daily notes
+  String getDailyNotes(String userId, DateTime date) {
+    if (!_dailyNotes.containsKey(userId)) {
+      return '';
+    }
+    final dateKey = '${date.year}-${date.month}-${date.day}';
+    return _dailyNotes[userId]![dateKey] ?? '';
+  }
+  
+  // Check if has notes on date
+  bool hasNotesOnDate(String userId, DateTime date) {
+    final notes = getDailyNotes(userId, date);
+    return notes.isNotEmpty;
+  }
+  
+  // Check if has meals on date
+  bool hasMealsOnDate(String userId, DateTime date) {
+    final meals = getMealsForDate(userId, date);
+    return meals.isNotEmpty;
+  }
+  
+  // Get meals for specific date
+  List<Meal> getMealsForDate(String userId, DateTime date) {
+    final meals = getMeals(userId);
+    return meals.where((meal) {
+      try {
+        final mealDateTime = DateTime.parse(meal.time);
+        return mealDateTime.year == date.year &&
+            mealDateTime.month == date.month &&
+            mealDateTime.day == date.day;
+      } catch (e) {
+        return false;
+      }
+    }).toList();
+  }
 }
 
 class UserCalorieData {
@@ -309,6 +358,7 @@ class Meal {
   final int protein;
   final int carbs;
   final int fat;
+  final List<String>? components; // daftar komponen/topping jika merupakan makanan gabungan
 
   Meal({
     required this.name,
@@ -318,6 +368,7 @@ class Meal {
     this.protein = 0,
     this.carbs = 0,
     this.fat = 0,
+    this.components,
   });
 }
 

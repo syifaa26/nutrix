@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
 import '../services/user_data_service.dart';
+import '../widgets/daily_notes_calendar.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -184,7 +185,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 ],
               ),
             ),
-
+          const SizedBox(height: 20),
+          
+          // Daily Notes Calendar Widget
+          if (_authService.currentUser != null)
+            DailyNotesCalendar(userId: _authService.currentUser!.id),
           const SizedBox(height: 100), // Space for bottom navigation
         ],
       ),

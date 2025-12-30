@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
 import '../services/user_data_service.dart';
 import '../theme/app_theme.dart';
@@ -26,7 +27,7 @@ class ProfileScreen extends StatelessWidget {
     final authService = AuthService();
     final currentUser = authService.currentUser;
     final userDataService = UserDataService();
-    
+
     // Get user data
     final userId = currentUser?.id ?? 'demo';
     final userProfile = userDataService.getUserProfile(userId);
@@ -35,17 +36,17 @@ class ProfileScreen extends StatelessWidget {
     final totalProtein = userDataService.getCalorieData(userId).totalProtein;
     final totalCarbs = userDataService.getCalorieData(userId).totalCarbs;
     final streak = userDataService.getCurrentStreak(userId);
-    
+
     // Cek apakah user sudah lengkap profil
     final hasCompletedProfile = userProfile != null;
-    
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             const SizedBox(height: 20),
-            
+
             // Profile Avatar and Info
             Column(
               children: [
@@ -54,7 +55,7 @@ class ProfileScreen extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF2ECC71),
+                    gradient: AppColors.primaryGradient,
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -69,7 +70,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 15),
-                
+
                 // Name
                 Text(
                   currentUser?.name ?? 'User',
@@ -80,7 +81,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 5),
-                
+
                 // Email
                 Text(
                   currentUser?.email ?? 'user@email.com',
@@ -91,72 +92,70 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 40),
-            
+
             // Stats Cards - Vertical Layout
             // Weight Card
             _buildStatCard(
               context: context,
               icon: Icons.monitor_weight_outlined,
-              iconColor: const Color(0xFF2ECC71),
+              iconColor: AppColors.primary,
               title: 'Berat Badan',
-              value: hasCompletedProfile 
-                  ? '${userProfile.currentWeight.toStringAsFixed(1)} kg' 
+              value: hasCompletedProfile
+                  ? '${userProfile.currentWeight.toStringAsFixed(1)} kg'
                   : '- kg',
-              subtitle: hasCompletedProfile 
-                  ? 'Target: ${userProfile.targetWeight.toStringAsFixed(1)} kg' 
+              subtitle: hasCompletedProfile
+                  ? 'Target: ${userProfile.targetWeight.toStringAsFixed(1)} kg'
                   : 'Belum diatur',
               isFullWidth: true,
             ),
-            
+
             const SizedBox(height: 15),
-            
+
             // Daily Target Card
             _buildStatCard(
               context: context,
               icon: Icons.local_fire_department_outlined,
-              iconColor: const Color(0xFFE67E22),
+              iconColor: AppColors.warning,
               title: 'Target Harian',
               value: '$targetCalories kkal',
-              subtitle: hasCompletedProfile 
-                  ? userProfile.goal 
+              subtitle: hasCompletedProfile
+                  ? userProfile.goal
                   : 'Belum ada data',
               isFullWidth: true,
             ),
-            
+
             const SizedBox(height: 15),
-            
+
             // Streak Card
             _buildStatCard(
               context: context,
               icon: Icons.emoji_events_outlined,
-              iconColor: const Color(0xFF9B59B6),
+              iconColor: AppColors.secondary,
               title: 'Streak',
-              value: hasCompletedProfile 
-                  ? '$streak hari' 
-                  : '0 hari',
-              subtitle: hasCompletedProfile 
-                  ? 'Pencapaian terbaik' 
+              value: hasCompletedProfile ? '$streak hari' : '0 hari',
+              subtitle: hasCompletedProfile
+                  ? 'Pencapaian terbaik'
                   : 'Mulai hari ini!',
               isFullWidth: true,
             ),
-            
+
             const SizedBox(height: 15),
-            
+
             // Total Calories Today Card
             _buildStatCard(
               context: context,
               icon: Icons.local_dining_outlined,
-              iconColor: const Color(0xFF3498DB),
+              iconColor: AppColors.info,
               title: 'Kalori Hari Ini',
               value: '$totalCalories kkal',
               subtitle: 'Protein: ${totalProtein}g | Karbo: ${totalCarbs}g',
               isFullWidth: true,
             ),
-            
+
             const SizedBox(height: 30),
-            
+
             // Menu Items
             _buildMenuItem(
               context: context,
@@ -169,7 +168,7 @@ class ProfileScreen extends StatelessWidget {
                 );
               },
             ),
-            
+
             _buildMenuItem(
               context: context,
               title: 'Target & Tujuan',
@@ -181,7 +180,7 @@ class ProfileScreen extends StatelessWidget {
                 );
               },
             ),
-            
+
             _buildMenuItem(
               context: context,
               title: 'Rutinitas Olahraga',
@@ -193,7 +192,7 @@ class ProfileScreen extends StatelessWidget {
                 );
               },
             ),
-            
+
             _buildMenuItem(
               context: context,
               title: 'Riwayat Berat Badan',
@@ -205,7 +204,7 @@ class ProfileScreen extends StatelessWidget {
                 );
               },
             ),
-            
+
             _buildMenuItem(
               context: context,
               title: 'Pengaturan',
@@ -217,7 +216,7 @@ class ProfileScreen extends StatelessWidget {
                 );
               },
             ),
-            
+
             _buildMenuItem(
               context: context,
               title: 'Tentang Aplikasi',
@@ -230,9 +229,7 @@ class ProfileScreen extends StatelessWidget {
                     width: 60,
                     height: 60,
                     decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
-                      ),
+                      gradient: AppColors.primaryGradient,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -248,11 +245,10 @@ class ProfileScreen extends StatelessWidget {
                   ],
                 );
               },
-              backgroundColor: const Color(0xFFE8F5E8),
             ),
-            
+
             const SizedBox(height: 30),
-            
+
             // Logout Button
             SizedBox(
               width: double.infinity,
@@ -263,17 +259,17 @@ class ProfileScreen extends StatelessWidget {
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-                child: const Text(
+                child: Text(
                   'Keluar',
                   style: TextStyle(
-                    color: Colors.red,
+                    color: AppColors.danger,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 100), // Space for bottom navigation
           ],
         ),
@@ -297,7 +293,7 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: AppColors.textSecondary.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, 2),
@@ -313,11 +309,7 @@ class ProfileScreen extends StatelessWidget {
               color: iconColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
           const SizedBox(width: 12),
           // Content
@@ -371,7 +363,7 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: AppColors.textSecondary.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, 2),
@@ -387,15 +379,9 @@ class ProfileScreen extends StatelessWidget {
             color: AppColors.textPrimary,
           ),
         ),
-        trailing: Icon(
-          Icons.chevron_right,
-          color: Colors.grey,
-        ),
+        trailing: Icon(Icons.chevron_right, color: AppColors.textSecondary),
         onTap: onTap,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 5,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       ),
     );
   }
@@ -420,27 +406,28 @@ class ProfileScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                
+
                 // Logout and navigate to auth screen
                 final authService = AuthService();
                 authService.logout();
-                
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  '/auth',
-                  (route) => false,
-                );
-                
+
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/auth', (route) => false);
+
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Logout berhasil'),
-                    backgroundColor: Color(0xFF2ECC71),
+                  SnackBar(
+                    content: const Text('Logout berhasil'),
+                    backgroundColor: AppColors.primary,
                   ),
                 );
+
+                // Exit app after logout
+                Future.delayed(const Duration(seconds: 1), () {
+                  SystemNavigator.pop();
+                });
               },
-              child: const Text(
-                'Keluar',
-                style: TextStyle(color: Colors.red),
-              ),
+              child: Text('Keluar', style: TextStyle(color: AppColors.danger)),
             ),
           ],
         );

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/nutrix_logo.dart';
 import 'onboarding_questionnaire.dart';
+import 'register_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -10,36 +12,29 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
-  late TabController _tabController;
+class _AuthScreenState extends State<AuthScreen> {
   final _loginFormKey = GlobalKey<FormState>();
   final _registerFormKey = GlobalKey<FormState>();
-  
-  // Login controllers
-  final _loginEmailController = TextEditingController();
-  final _loginPasswordController = TextEditingController();
-  
-  // Register controllers
-  final _registerNameController = TextEditingController();
-  final _registerEmailController = TextEditingController();
-  final _registerPasswordController = TextEditingController();
-  final _registerConfirmPasswordController = TextEditingController();
-  
-  bool _isLoginLoading = false;
-  bool _isRegisterLoading = false;
+
+  final TextEditingController _loginEmailController = TextEditingController();
+  final TextEditingController _loginPasswordController =
+      TextEditingController();
+  final TextEditingController _registerNameController = TextEditingController();
+  final TextEditingController _registerEmailController =
+      TextEditingController();
+  final TextEditingController _registerPasswordController =
+      TextEditingController();
+  final TextEditingController _registerConfirmPasswordController =
+      TextEditingController();
+
   bool _obscureLoginPassword = true;
   bool _obscureRegisterPassword = true;
   bool _obscureConfirmPassword = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
+  bool _isLoginLoading = false;
+  bool _isRegisterLoading = false;
 
   @override
   void dispose() {
-    _tabController.dispose();
     _loginEmailController.dispose();
     _loginPasswordController.dispose();
     _registerNameController.dispose();
@@ -52,119 +47,48 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppColors.primaryGradient),
         child: SafeArea(
-          child: Column(
-            children: [
-              // Modern Header
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.xxl),
-                child: Column(
-                  children: [
-                    // Modern Logo/Icon with shadow
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppRadius.xl),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo section
+                  Container(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: Column(
+                      children: [
+                        const NutrixLogo(size: 80, showText: false),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Nutrix',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.restaurant_rounded,
-                        size: 45,
-                        color: AppColors.primary,
-                      ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      'Nutrix',
-                      style: AppTextStyles.h1.copyWith(
-                        color: Colors.white,
-                        fontSize: 36,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Aplikasi tracking kalori nutrisi dengan AI',
-                      style: AppTextStyles.body1.copyWith(
-                        color: Colors.white.withOpacity(0.95),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-              
-              // Modern Auth Form Container
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(AppRadius.xxl),
-                      topRight: Radius.circular(AppRadius.xxl),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, -5),
-                      ),
-                    ],
                   ),
-                  child: Column(
-                    children: [
-                      // Modern Tab Bar
-                      Container(
-                        margin: const EdgeInsets.all(AppSpacing.lg),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                        ),
-                        child: TabBar(
-                          controller: _tabController,
-                          indicator: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                          ),
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          labelColor: Colors.white,
-                          unselectedLabelColor: AppColors.textSecondary,
-                          labelStyle: AppTextStyles.body1.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                          tabs: const [
-                            Tab(text: 'Masuk'),
-                            Tab(text: 'Daftar'),
-                          ],
-                        ),
-                      ),
-                      
-                      // Tab Content
-                      Expanded(
-                        child: TabBarView(
-                          controller: _tabController,
-                          children: [
-                            _buildLoginForm(),
-                            _buildRegisterForm(),
-                          ],
-                        ),
-                      ),
-                    ],
+
+                  // Card putih berisi form login
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: AppShadow.large,
+                    ),
+                    child: _buildLoginForm(),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -180,28 +104,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 20),
-            
-            // Welcome text
-            const Text(
-              'Selamat Datang Kembali!',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Masuk ke akun Anda untuk melanjutkan',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 40),
-            
+
             // Email field
             _buildTextField(
               controller: _loginEmailController,
@@ -212,7 +115,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               validator: _validateEmail,
             ),
             const SizedBox(height: 20),
-            
+
             // Password field
             _buildTextField(
               controller: _loginPasswordController,
@@ -222,7 +125,9 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               obscureText: _obscureLoginPassword,
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscureLoginPassword ? Icons.visibility : Icons.visibility_off,
+                  _obscureLoginPassword
+                      ? Icons.visibility
+                      : Icons.visibility_off,
                   color: Colors.grey[600],
                 ),
                 onPressed: () {
@@ -234,7 +139,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               validator: _validatePassword,
             ),
             const SizedBox(height: 15),
-            
+
             // Forgot password
             Align(
               alignment: Alignment.centerRight,
@@ -245,14 +150,14 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                 child: const Text(
                   'Lupa Password?',
                   style: TextStyle(
-                    color: Color(0xFF2ECC71),
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            
+
             // Modern Login button with gradient
             Container(
               decoration: BoxDecoration(
@@ -289,7 +194,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            
+
             // Divider
             Row(
               children: [
@@ -298,17 +203,14 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
                     'atau',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
                   ),
                 ),
                 Expanded(child: Divider(color: Colors.grey[300])),
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Demo login button
             OutlinedButton(
               onPressed: _handleDemoLogin,
@@ -317,14 +219,43 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                side: const BorderSide(color: Color(0xFF2ECC71)),
+                side: const BorderSide(color: AppColors.primary),
               ),
               child: const Text(
                 'Coba Demo',
                 style: TextStyle(
-                  color: Color(0xFF2ECC71),
+                  color: AppColors.primary,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Link ke halaman register terpisah
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                  );
+                },
+                child: RichText(
+                  text: TextSpan(
+                    style: AppTextStyles.body2.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                    children: [
+                      const TextSpan(text: 'Belum punya akun? '),
+                      TextSpan(
+                        text: 'Daftar Sekarang',
+                        style: AppTextStyles.body2.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -334,154 +265,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildRegisterForm() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Form(
-        key: _registerFormKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 20),
-            
-            // Title
-            const Text(
-              'Buat Akun Baru',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Mulai perjalanan hidup sehat Anda',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 40),
-            
-            // Name field
-            _buildTextField(
-              controller: _registerNameController,
-              label: 'Nama Lengkap',
-              hint: 'Masukkan nama lengkap Anda',
-              icon: Icons.person_outlined,
-              validator: _validateName,
-            ),
-            const SizedBox(height: 20),
-            
-            // Email field
-            _buildTextField(
-              controller: _registerEmailController,
-              label: 'Email',
-              hint: 'Masukkan email Anda',
-              icon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-              validator: _validateEmail,
-            ),
-            const SizedBox(height: 20),
-            
-            // Password field
-            _buildTextField(
-              controller: _registerPasswordController,
-              label: 'Password',
-              hint: 'Masukkan password Anda',
-              icon: Icons.lock_outlined,
-              obscureText: _obscureRegisterPassword,
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscureRegisterPassword ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey[600],
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscureRegisterPassword = !_obscureRegisterPassword;
-                  });
-                },
-              ),
-              validator: _validatePassword,
-            ),
-            const SizedBox(height: 20),
-            
-            // Confirm password field
-            _buildTextField(
-              controller: _registerConfirmPasswordController,
-              label: 'Konfirmasi Password',
-              hint: 'Masukkan ulang password Anda',
-              icon: Icons.lock_outlined,
-              obscureText: _obscureConfirmPassword,
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey[600],
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscureConfirmPassword = !_obscureConfirmPassword;
-                  });
-                },
-              ),
-              validator: _validateConfirmPassword,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            
-            // Modern Register button with gradient
-            Container(
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                boxShadow: AppShadow.medium,
-              ),
-              child: ElevatedButton(
-                onPressed: _isRegisterLoading ? null : _handleRegister,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
-                ),
-                child: _isRegisterLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Text(
-                        'Daftar',
-                        style: AppTextStyles.body1.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            
-            // Terms and conditions
-            Text(
-              'Dengan mendaftar, Anda menyetujui Syarat & Ketentuan dan Kebijakan Privasi kami',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // _buildRegisterForm dihapus karena register pindah ke RegisterScreen
 
   Widget _buildTextField({
     required TextEditingController controller,
@@ -525,7 +309,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF2ECC71), width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -537,7 +321,10 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
             ),
             filled: true,
             fillColor: Colors.grey[50],
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
         ),
       ],
@@ -643,10 +430,10 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       if (result == 'SUCCESS') {
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Akun berhasil dibuat!'),
-            backgroundColor: Color(0xFF2ECC71),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: const Text('Akun berhasil dibuat!'),
+            backgroundColor: AppColors.primary,
+            duration: const Duration(seconds: 2),
           ),
         );
 
@@ -668,12 +455,14 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
       } else if (result == 'EMAIL_EXISTS') {
         // Email sudah terdaftar - arahkan ke tab login
         final registeredEmail = _registerEmailController.text.trim();
-        
+
         print('Email exists, switching to login tab'); // Debug
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Email sudah terdaftar! Silakan masuk dengan akun Anda.'),
+            content: Text(
+              'Email sudah terdaftar! Silakan masuk dengan akun Anda.',
+            ),
             backgroundColor: Colors.orange,
             duration: Duration(seconds: 3),
           ),
@@ -685,8 +474,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
         _registerPasswordController.clear();
         _registerConfirmPasswordController.clear();
 
-        // Pindah ke tab login dan isi email otomatis
-        _tabController.animateTo(0);
+        // Isi email otomatis pada form login
         _loginEmailController.text = registeredEmail;
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -710,7 +498,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
   // Show forgot password dialog
   void _showForgotPasswordDialog() {
     final emailController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -752,19 +540,18 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               onPressed: () {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Link reset password telah dikirim ke email Anda'),
-                    backgroundColor: Color(0xFF2ECC71),
+                  SnackBar(
+                    content: const Text(
+                      'Link reset password telah dikirim ke email Anda',
+                    ),
+                    backgroundColor: AppColors.primary,
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2ECC71),
+                backgroundColor: AppColors.primary,
               ),
-              child: const Text(
-                'Kirim',
-                style: TextStyle(color: Colors.white),
-              ),
+              child: const Text('Kirim', style: TextStyle(color: Colors.white)),
             ),
           ],
         );

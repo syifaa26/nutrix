@@ -3,84 +3,80 @@ import 'package:flutter/material.dart';
 /// Nutrix App Color Palette - Green Energy Theme 🍃
 /// Fresh & Natural Design for Nutrition App
 class AppColors {
-  // Primary Colors - Fresh Green Theme
-  static const Color primary = Color(0xFF11998E); // Deep Turquoise
-  static const Color primaryLight = Color(0xFF38EF7D); // Bright Lime Green
-  static const Color primaryDark = Color(0xFF0B6E63);
-  
-  // Secondary Colors - Sky Blue Theme
-  static const Color secondary = Color(0xFF2E86DE); // Ocean Blue
-  static const Color secondaryLight = Color(0xFF54A0FF); // Sky Blue
-  static const Color secondaryDark = Color(0xFF1E5FAA);
-  
-  // Accent Colors - Vibrant Orange
-  static const Color accent = Color(0xFFFFA502); // Bright Orange
-  static const Color accentLight = Color(0xFFFFD32A);
-  
-  // Status Colors - Natural Theme
-  static const Color success = Color(0xFF38EF7D); // Bright Green
-  static const Color warning = Color(0xFFFFA502); // Orange
-  static const Color danger = Color(0xFFFF6348); // Coral Red
-  static const Color info = Color(0xFF54A0FF); // Sky Blue
-  
-  // Nutrition Colors - Fresh & Vibrant
-  static const Color protein = Color(0xFFFF6348); // Coral Red
-  static const Color carbs = Color(0xFFFFD32A); // Golden Yellow
-  static const Color fat = Color(0xFF2E86DE); // Ocean Blue
-  static const Color calories = Color(0xFF38EF7D); // Lime Green
-  
-  // Background Colors
-  static const Color background = Color(0xFFF8F9FA);
-  static const Color backgroundDark = Color(0xFFDFE6E9);
-  static const Color card = Color(0xFFFFFFFF);
-  static const Color cardLight = Color(0xFFFAFBFC);
-  
-  // Dark Theme Colors
-  static const Color darkBackground = Color(0xFF1A1A1A);
-  static const Color darkCard = Color(0xFF2D2D2D);
-  static const Color darkCardLight = Color(0xFF3A3A3A);
-  static const Color darkSurface = Color(0xFF242424);
-  static const Color darkBorder = Color(0xFF404040);
-  
-  // Text Colors
-  static const Color textPrimary = Color(0xFF2D3436);
-  static const Color textSecondary = Color(0xFF636E72);
-  static const Color textLight = Color(0xFFB2BEC3);
+  // Light theme palette (matching TSX variables)
+  static const Color primary = Color(0xFF5A7E8C); // --primary
+  static const Color primaryLight = Color(0xFF8FB4BF); // softened
+  static const Color primaryDark = Color(0xFF4A6B7A);
+
+  static const Color secondary = Color(0xFF8FB4BF); // --secondary
+  static const Color secondaryLight = Color(0xFFC9DADF);
+  static const Color secondaryDark = Color(0xFF6B9FAE);
+
+  static const Color accent = Color(0xFFC9DADF); // --accent
+  static const Color accentLight = Color(0xFFE1ECEF);
+
+  static const Color success = Color(0xFF22C55E);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color danger = Color(0xFFEF4444); // --destructive
+  static const Color info = Color(0xFF3B82F6);
+
+  // Nutrition colors (can reuse brand hues)
+  static const Color protein = Color(0xFFEF4444);
+  static const Color carbs = Color(0xFFF59E0B);
+  static const Color fat = Color(0xFF5A7E8C);
+  static const Color calories = Color(0xFF8FB4BF);
+
+  // Background / surface light
+  static const Color background = Color(0xFFF4F7F8); // --background
+  static const Color backgroundDark = Color(0xFFE6EDF0);
+  static const Color card = Color(0xFFFFFFFF); // --card
+  static const Color cardLight = Color(0xFFF9FBFC);
+
+  // Dark theme palette
+  static const Color darkBackground = Color(0xFF1A2428); // --background (dark)
+  static const Color darkCard = Color(0xFF2A3A3E); // --card (dark)
+  static const Color darkCardLight = Color(0xFF313F44);
+  static const Color darkSurface = Color(0xFF212E32);
+  static const Color darkBorder = Color(0xFF3A4A4E);
+
+  // Text light
+  static const Color textPrimary = Color(0xFF2A3A3E); // --foreground
+  static const Color textSecondary = Color(0xFF5A7E8C);
+  static const Color textLight = Color(0xFF8FB4BF);
   static const Color textWhite = Color(0xFFFFFFFF);
-  
-  // Dark Theme Text Colors
-  static const Color darkTextPrimary = Color(0xFFE8E8E8);
-  static const Color darkTextSecondary = Color(0xFFB0B0B0);
-  static const Color darkTextLight = Color(0xFF808080);
-  
-  // Fresh & Natural Gradient Colors 🍃
+
+  // Text dark
+  static const Color darkTextPrimary = Color(0xFFF4F7F8);
+  static const Color darkTextSecondary = Color(0xFF8FB4BF);
+  static const Color darkTextLight = Color(0xFFC9DADF);
+
+  // Gradients updated to new palette
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF11998E), Color(0xFF38EF7D)], // Turquoise to Lime Green
+    colors: [Color(0xFF5A7E8C), Color(0xFF8FB4BF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-  
+
   static const LinearGradient secondaryGradient = LinearGradient(
-    colors: [Color(0xFF2E86DE), Color(0xFF54A0FF)], // Ocean to Sky Blue
+    colors: [Color(0xFF8FB4BF), Color(0xFFC9DADF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-  
+
   static const LinearGradient accentGradient = LinearGradient(
-    colors: [Color(0xFFFFA502), Color(0xFFFFD32A)], // Orange to Yellow
+    colors: [Color(0xFF4A6B7A), Color(0xFF8FB4BF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-  
-  // Alternative Natural Gradients
+
   static const LinearGradient forestGradient = LinearGradient(
-    colors: [Color(0xFF134E5E), Color(0xFF71B280)], // Deep Green to Light Green
+    colors: [Color(0xFF1A2428), Color(0xFF4A6B7A)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-  
+
   static const LinearGradient sunsetGradient = LinearGradient(
-    colors: [Color(0xFFFFA502), Color(0xFFFF6348)], // Orange to Coral
+    colors: [Color(0xFF8FB4BF), Color(0xFFC9DADF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

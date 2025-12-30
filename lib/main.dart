@@ -5,16 +5,43 @@ import 'screens/statistics_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/landing_page.dart';
 import 'services/auth_service.dart';
 import 'services/user_data_service.dart';
+import 'services/theme_service.dart';
 import 'theme/app_theme.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const NutrixApp());
 }
 
-class NutrixApp extends StatelessWidget {
+class NutrixApp extends StatefulWidget {
   const NutrixApp({super.key});
+
+  @override
+  State<NutrixApp> createState() => _NutrixAppState();
+}
+
+class _NutrixAppState extends State<NutrixApp> {
+  final ThemeService _themeService = ThemeService();
+
+  @override
+  void initState() {
+    super.initState();
+    // Ensure theme is loaded once app starts
+    _themeService.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    _themeService.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +51,15 @@ class NutrixApp extends StatelessWidget {
         statusBarIconBrightness: Brightness.dark,
       ),
     );
-    
-    return MaterialApp(
+    // Trigger initial theme load (only once)
+    _themeService;
+
+    return AnimatedBuilder(
+      animation: _themeService,
+      builder: (context, _) {
+        return MaterialApp(
       title: 'Nutrix',
+      themeMode: _themeService.themeMode,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primary,
@@ -65,13 +98,61 @@ class NutrixApp extends StatelessWidget {
           ),
         ),
       ),
-      
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          brightness: Brightness.dark,
+          seedColor: AppColors.primary,
+          primary: AppColors.primary,
+          secondary: AppColors.secondary,
+          background: AppColors.darkBackground,
+        ),
+        scaffoldBackgroundColor: AppColors.darkBackground,
+        fontFamily: 'SF Pro Display',
+        useMaterial3: true,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: IconThemeData(color: AppColors.darkTextPrimary),
+        ),
+        cardTheme: CardThemeData(
+          color: AppColors.darkCard,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.textWhite,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+            textStyle: AppTextStyles.button,
+          ),
+        ),
+      ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/auth',
       routes: {
-        '/auth': (context) => const AuthScreen(),
-        '/onboarding': (context) => const OnboardingScreen(),
-        '/home': (context) => const NutrixHome(),
+        '/home': (_) => const NutrixHome(),
+      },
+      home: Builder(
+        builder: (innerContext) {
+          return LandingPage(
+            onGetStarted: () {
+              Navigator.of(innerContext).pushReplacement(
+                MaterialPageRoute(builder: (_) => const AuthScreen()),
+              );
+            },
+          );
+        },
+      ),
+    );
       },
     );
   }
@@ -86,11 +167,29 @@ class NutrixHome extends StatefulWidget {
 // Beranda utama aplikasi Nutrix
 class _NutrixHomeState extends State<NutrixHome> {
   int _selectedIndex = 0;
+  late final UserDataService _userDataService; // listen for changes
+
+  void _onDataChanged() {
+    if (mounted) setState(() {}); // trigger rebuild when meals change
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _userDataService = UserDataService();
+    _userDataService.addListener(_onDataChanged);
+  }
+
+  @override
+  void dispose() {
+    _userDataService.removeListener(_onDataChanged);
+    super.dispose();
   }
 
   @override
@@ -219,10 +318,21 @@ class _NutrixHomeState extends State<NutrixHome> {
     }
   }
 
+  // Format waktu jadi HH:MM saja
+  String _formatTime(String raw) {
+    try {
+      final dt = DateTime.parse(raw);
+      return '${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}';
+    } catch (_) {
+      final match = RegExp(r'(\d{2}:\d{2})').firstMatch(raw);
+      return match?.group(1) ?? raw;
+    }
+  }
+
   Widget _buildHomeContent() {
     final authService = AuthService();
     final currentUser = authService.currentUser;
-    final userDataService = UserDataService();
+    final userDataService = _userDataService; // use listening instance
     
     // Get user data
     final userId = currentUser?.id ?? 'demo';
@@ -240,7 +350,6 @@ class _NutrixHomeState extends State<NutrixHome> {
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.sm),
-          // 🍃 Modern Calorie Counter Card with Fresh Green Gradient!
           Container(
             margin: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
@@ -253,257 +362,184 @@ class _NutrixHomeState extends State<NutrixHome> {
               boxShadow: [
                 BoxShadow(
                   color: AppColors.primary.withOpacity(0.4),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-                spreadRadius: 2,
-              ),
-            ],
-            // Border tebal putih agar lebih mencolok!
-            border: Border.all(
-              color: Colors.white.withOpacity(0.3),
-              width: 2,
-            ),
-          ),
-          child: Column(
-            children: [
-              Text(
-                'Kalori Hari Ini',
-                style: AppTextStyles.body1.copyWith(
-                  color: AppColors.textWhite.withOpacity(0.9),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: totalCalories.toString(),
-                      style: AppTextStyles.number.copyWith(
-                        color: AppColors.textWhite,
-                        fontSize: 56,
-                      ),
-                    ),
-                    TextSpan(
-                      text: ' / $targetCalories',
-                      style: AppTextStyles.h4.copyWith(
-                        color: AppColors.textWhite.withOpacity(0.8),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'kkal',
-                style: AppTextStyles.body2.copyWith(
-                  color: AppColors.textWhite.withOpacity(0.8),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              // Modern Progress Bar
-              Container(
-                height: 12,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                  color: AppColors.textWhite.withOpacity(0.2),
-                ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: progress,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                      color: AppColors.textWhite,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.textWhite.withOpacity(0.3),
-                          blurRadius: 8,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              // Modern Macronutrients Cards
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildModernMacroItem(
-                    Icons.emoji_events_rounded,
-                    remainingCalories.toString(), 
-                    'Sisa', 
-                    AppColors.textWhite,
-                  ),
-                  _buildModernMacroItem(
-                    Icons.fitness_center_rounded,
-                    '${totalProtein}g', 
-                    'Protein', 
-                    AppColors.textWhite,
-                  ),
-                  _buildModernMacroItem(
-                    Icons.bakery_dining_rounded,
-                    '${totalCarbs}g', 
-                    'Karbo', 
-                    AppColors.textWhite,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        // Modern Add Food Button with GREEN GRADIENT
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient, // HIJAU GRADIEN!
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.4),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => const CameraDetectionModal(),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.xs),
-                  decoration: BoxDecoration(
-                    color: AppColors.textWhite.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt_rounded,
-                    color: AppColors.textWhite,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  'Tambah Makanan',
-                  style: AppTextStyles.button.copyWith(
-                    fontSize: 16,
-                  ),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        // Meals List with Modern Header
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Makanan Hari Ini',
-                    style: AppTextStyles.h3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Centered calorie headline
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: totalCalories.toString(),
+                        style: AppTextStyles.number.copyWith(
+                          color: AppColors.textWhite,
+                          fontSize: 56,
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' / $targetCalories',
+                        style: AppTextStyles.h4.copyWith(
+                          color: AppColors.textWhite.withOpacity(0.85),
+                        ),
+                      ),
+                    ],
                   ),
-                  if (meals.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.full),
-                        ),
-                        child: Text(
-                          '${meals.length} item',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                  ],
                 ),
+                const SizedBox(height: 6),
+                Text('kkal', style: AppTextStyles.body2.copyWith(color: AppColors.textWhite.withOpacity(0.85))),
                 const SizedBox(height: AppSpacing.md),
-                meals.isEmpty 
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: AppSpacing.xl,
-                          horizontal: AppSpacing.lg,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(AppSpacing.lg),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.15),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.restaurant_menu_rounded,
-                                size: 48,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              'Belum ada makanan hari ini',
-                              style: AppTextStyles.body1.copyWith(
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Tap "Tambah Makanan" untuk memulai',
-                              style: AppTextStyles.body2.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                              textAlign: TextAlign.center,
+                // Centered progress bar with subtle glow
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    height: 12,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadius.full),
+                      color: AppColors.textWhite.withOpacity(0.25),
+                    ),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: progress,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                          color: AppColors.textWhite,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.textWhite.withOpacity(0.35),
+                              blurRadius: 12,
+                              spreadRadius: 2,
                             ),
                           ],
                         ),
                       ),
-                    )
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: meals.length,
-                      itemBuilder: (context, index) {
-                        final meal = meals[index];
-                        return _buildMealItem(
-                          meal.name,
-                          meal.type,
-                          meal.time,
-                          '${meal.calories} kkal',
-                        );
-                      },
                     ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Macros row centered
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildModernMacroItem(Icons.emoji_events_rounded, remainingCalories.toString(), 'Sisa', AppColors.textWhite),
+                    _buildModernMacroItem(Icons.fitness_center_rounded, '${totalProtein}g', 'Protein', AppColors.textWhite),
+                    _buildModernMacroItem(Icons.bakery_dining_rounded, '${totalCarbs}g', 'Karbo', AppColors.textWhite),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          // Tombol tambah makanan
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.35),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const CameraDetectionModal(),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.xs),
+                    decoration: BoxDecoration(
+                      color: AppColors.textWhite.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                    ),
+                    child: const Icon(Icons.camera_alt_rounded, color: AppColors.textWhite, size: 20),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text('Tambah Makanan', style: AppTextStyles.button.copyWith(fontSize: 16)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          // Daftar makanan
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Makanan Hari Ini', style: AppTextStyles.h3),
+                    if (meals.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                        ),
+                        child: Text('${meals.length} item', style: AppTextStyles.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
+                meals.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl, horizontal: AppSpacing.lg),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(AppSpacing.lg),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.restaurant_menu_rounded, size: 48, color: AppColors.primary),
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              Text('Belum ada makanan hari ini', style: AppTextStyles.body1.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600), textAlign: TextAlign.center),
+                              const SizedBox(height: 4),
+                              Text('Tap "Tambah Makanan" untuk memulai', style: AppTextStyles.body2.copyWith(color: AppColors.textSecondary), textAlign: TextAlign.center),
+                            ],
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: meals.length,
+                        itemBuilder: (context, index) {
+                          return _buildMealItem(meals[index]);
+                        },
+                      ),
               ],
             ),
           ),
@@ -548,140 +584,213 @@ class _NutrixHomeState extends State<NutrixHome> {
     );
   }
 
-  Widget _buildMealItem(String name, String type, String time, String calories) {
-    // Modern color mapping with new palette
+  Widget _buildMealItem(Meal meal) {
     Color typeColor;
     IconData typeIcon;
-    switch (type) {
+    switch (meal.type) {
       case 'Sarapan':
-        typeColor = const Color(0xFFFF9F43); // Warm Orange
+        typeColor = const Color(0xFFFF9F43);
         typeIcon = Icons.wb_sunny_rounded;
         break;
       case 'Makan Siang':
-        typeColor = AppColors.secondary; // Purple
+        typeColor = AppColors.secondary;
         typeIcon = Icons.lunch_dining_rounded;
         break;
       case 'Makan Malam':
-        typeColor = const Color(0xFF5F27CD); // Deep Purple
+        typeColor = const Color(0xFF5F27CD);
         typeIcon = Icons.dinner_dining_rounded;
         break;
       default:
-        typeColor = AppColors.accent; // Yellow
+        typeColor = AppColors.accent;
         typeIcon = Icons.fastfood_rounded;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        boxShadow: AppShadow.small,
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.1),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          // Type Icon
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: typeColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Icon(
-              typeIcon,
-              color: typeColor,
-              size: 24,
-            ),
+    final timeOnly = _formatTime(meal.time);
+
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.white,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
           ),
-          const SizedBox(width: AppSpacing.md),
-          // Meal Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: AppTextStyles.body1.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Row(
+          builder: (ctx) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            typeColor,
-                            typeColor.withOpacity(0.8),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(AppRadius.full),
-                      ),
-                      child: Text(
-                        type,
-                        style: AppTextStyles.caption.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+                    Center(
+                      child: Container(
+                        width: 42,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(3),
                         ),
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Icon(
-                      Icons.access_time_rounded,
-                      size: 14,
-                      color: AppColors.textSecondary,
+                    const SizedBox(height: 16),
+                    Text(meal.name, style: AppTextStyles.h3),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.access_time_rounded, size: 16, color: AppColors.textSecondary),
+                        const SizedBox(width: 4),
+                        Text(timeOnly, style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                        const SizedBox(width: 12),
+                        Chip(label: Text(meal.type), backgroundColor: typeColor.withOpacity(0.15)),
+                      ],
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      time,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary,
+                    const SizedBox(height: 16),
+                    Text('Kalori: ${meal.calories} kkal', style: AppTextStyles.body1.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _macroPill('Protein', meal.protein, Colors.deepPurple),
+                        _macroPill('Karbo', meal.carbs, Colors.blue),
+                        _macroPill('Lemak', meal.fat, Colors.orange),
+                      ],
+                    ),
+                    if (meal.components != null && meal.components!.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text('Komponen', style: AppTextStyles.body1.copyWith(fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: -4,
+                        children: meal.components!
+                            .map((c) => Chip(label: Text(c.replaceAll('_', ' '))))
+                            .toList(),
                       ),
-                    ),
+                    ],
                   ],
                 ),
-              ],
+              ),
+            );
+          },
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSpacing.md),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          boxShadow: AppShadow.small,
+          border: Border.all(color: AppColors.primary.withOpacity(0.08), width: 1),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: typeColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Icon(typeIcon, color: typeColor, size: 22),
             ),
-          ),
-          // Calories
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  calories.split(' ')[0],
-                  style: AppTextStyles.body1.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          meal.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.body1.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: [typeColor, typeColor.withOpacity(0.75)]),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                        ),
+                        child: Text(
+                          meal.type,
+                          maxLines: 1,
+                          overflow: TextOverflow.fade,
+                          style: AppTextStyles.caption.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Text(
-                  'kkal',
-                  style: AppTextStyles.caption.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 10,
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(Icons.access_time_rounded, size: 14, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(timeOnly, style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+            const SizedBox(width: AppSpacing.md),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    meal.calories.toString(),
+                    style: AppTextStyles.body1.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    'kkal',
+                    style: AppTextStyles.caption.copyWith(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _macroPill(String label, int value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(AppRadius.full),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(radius: 4, backgroundColor: color),
+          const SizedBox(width: 6),
+          Text('$label: $value g', style: AppTextStyles.caption.copyWith(color: color, fontWeight: FontWeight.w600)),
         ],
       ),
     );

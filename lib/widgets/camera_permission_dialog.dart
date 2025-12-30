@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import '../services/permission_service.dart';
+import '../theme/app_theme.dart';
 
 class CameraPermissionDialog {
   static Future<bool> requestPermission(BuildContext context) async {
     // Check current permission status
     final status = await PermissionService.checkCameraPermission();
-    
+
     if (status == PermissionStatus.granted) {
       return true;
     }
-    
+
     // Show explanation dialog for new users
     final shouldRequest = await showDialog<bool>(
       context: context,
@@ -20,11 +21,7 @@ class CameraPermissionDialog {
           ),
           title: Row(
             children: [
-              Icon(
-                Icons.camera_alt,
-                color: const Color(0xFF2ECC71),
-                size: 28,
-              ),
+              Icon(Icons.camera_alt, color: AppColors.primary, size: 28),
               const SizedBox(width: 10),
               const Text('Izin Kamera'),
             ],
@@ -35,10 +32,7 @@ class CameraPermissionDialog {
             children: [
               const Text(
                 'Nutrix memerlukan akses kamera untuk:',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
               ),
               const SizedBox(height: 15),
               _buildPermissionReason(
@@ -69,15 +63,12 @@ class CameraPermissionDialog {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text(
-                'Nanti',
-                style: TextStyle(color: Colors.grey),
-              ),
+              child: const Text('Nanti', style: TextStyle(color: Colors.grey)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2ECC71),
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -91,14 +82,14 @@ class CameraPermissionDialog {
         );
       },
     );
-    
+
     if (shouldRequest != true) {
       return false;
     }
-    
+
     // Request permission
     final result = await PermissionService.requestCameraPermission();
-    
+
     if (result == PermissionStatus.granted) {
       return true;
     } else if (result == PermissionStatus.permanentlyDenied) {
@@ -118,26 +109,17 @@ class CameraPermissionDialog {
       return false;
     }
   }
-  
+
   static Widget _buildPermissionReason(IconData icon, String text) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 20,
-          color: const Color(0xFF2ECC71),
-        ),
+        Icon(icon, size: 20, color: AppColors.primary),
         const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 14),
-          ),
-        ),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
       ],
     );
   }
-  
+
   static Future<void> _showOpenSettingsDialog(BuildContext context) async {
     await showDialog(
       context: context,
@@ -163,7 +145,7 @@ class CameraPermissionDialog {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2ECC71),
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

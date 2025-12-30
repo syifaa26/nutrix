@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -15,25 +16,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<OnboardingPage> _pages = [
     OnboardingPage(
       title: 'Selamat Datang di Nutrix!',
-      description: 'Aplikasi pelacak nutrisi yang membantu Anda mencapai gaya hidup sehat dengan mudah',
+      description:
+          'Aplikasi pelacak nutrisi yang membantu Anda mencapai gaya hidup sehat dengan mudah',
       icon: Icons.restaurant_menu,
-      color: const Color(0xFF2ECC71),
+      color: AppColors.primary,
     ),
     OnboardingPage(
       title: 'Deteksi Makanan Otomatis',
-      description: 'Gunakan kamera untuk mendeteksi makanan dan dapatkan informasi nutrisi secara instan',
+      description:
+          'Gunakan kamera untuk mendeteksi makanan dan dapatkan informasi nutrisi secara instan',
       icon: Icons.camera_alt,
-      color: const Color(0xFF3498DB),
+      color: AppColors.secondary,
     ),
     OnboardingPage(
       title: 'Pantau Kalori Harian',
-      description: 'Lacak asupan kalori, protein, karbohidrat, dan lemak Anda setiap hari',
+      description:
+          'Lacak asupan kalori, protein, karbohidrat, dan lemak Anda setiap hari',
       icon: Icons.bar_chart,
       color: const Color(0xFFE67E22),
     ),
     OnboardingPage(
       title: 'Statistik & Progress',
-      description: 'Lihat perkembangan Anda dengan grafik dan statistik yang detail',
+      description:
+          'Lihat perkembangan Anda dengan grafik dan statistik yang detail',
       icon: Icons.trending_up,
       color: const Color(0xFF9B59B6),
     ),
@@ -41,7 +46,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       title: 'Siap Memulai?',
       description: 'Mari mulai perjalanan kesehatan Anda bersama Nutrix!',
       icon: Icons.celebration,
-      color: const Color(0xFF2ECC71),
+      color: AppColors.primary,
     ),
   ];
 
@@ -98,10 +103,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   onPressed: _skipOnboarding,
                   child: const Text(
                     'Lewati',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ),
               ),
@@ -136,7 +138,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: ElevatedButton(
                   onPressed: _nextPage,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2ECC71),
+                    backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
@@ -173,11 +175,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               color: page.color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              page.icon,
-              size: 100,
-              color: page.color,
-            ),
+            child: Icon(page.icon, size: 100, color: page.color),
           ),
           const SizedBox(height: 40),
           // Title
@@ -212,9 +210,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       width: _currentPage == index ? 24 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: _currentPage == index 
-            ? const Color(0xFF2ECC71) 
-            : Colors.grey[300],
+        color: _currentPage == index ? AppColors.primary : Colors.grey[300],
         borderRadius: BorderRadius.circular(4),
       ),
     );

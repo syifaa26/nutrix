@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
+import 'notification_sync_screen.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -208,6 +209,34 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             ),
             
             const SizedBox(height: AppSpacing.xl),
+            
+            // Sync Settings Button
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationSyncScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.cloud_sync),
+                label: const Text('Sinkronisasi Antar Perangkat'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: AppSpacing.md),
             
             // Info box
             Container(

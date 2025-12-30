@@ -72,9 +72,9 @@ class _TargetGoalsScreenState extends State<TargetGoalsScreen> {
       );
       
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Target & tujuan berhasil diperbarui'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: const Text('Target & tujuan berhasil diperbarui'),
+          backgroundColor: AppColors.primary,
         ),
       );
       

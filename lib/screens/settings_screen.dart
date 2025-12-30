@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
 import '../services/user_data_service.dart';
 import '../services/notification_service.dart';
+import '../services/theme_service.dart';
 import '../theme/app_theme.dart';
-import 'auth_screen.dart';
+import 'auth_screen.dart' show AuthScreen;
 import 'notification_settings_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_conditions_screen.dart';
@@ -72,6 +74,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             
             // App Settings
             _buildSectionHeader('Pengaturan Aplikasi'),
+            // Dark Mode Toggle
+            _buildSettingToggleItem(
+              context,
+              icon: Icons.dark_mode_outlined,
+              title: 'Mode Gelap',
+              subtitle: 'Sesuaikan tampilan terang/gelap',
+              value: ThemeService().isDarkMode,
+              onChanged: (value) async {
+                await ThemeService().setDarkMode(value);
+                setState(() {});
+              },
+            ),
             _buildSettingItem(
               context,
               icon: Icons.notifications_outlined,
@@ -202,8 +216,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: const Icon(Icons.logout),
                   label: const Text('Keluar'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: const BorderSide(color: Colors.red),
+                    foregroundColor: AppColors.danger,
+                    side: BorderSide(color: AppColors.danger),
                     padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.md),
@@ -290,6 +304,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
+  Widget _buildSettingToggleItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        boxShadow: AppShadow.small,
+      ),
+      child: ListTile(
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            color: AppColors.primary,
+            size: 20,
+          ),
+        ),
+        title: Text(
+          title,
+          style: AppTextStyles.body1.copyWith(
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: AppTextStyles.caption,
+        ),
+        trailing: Switch(
+          value: value,
+          activeColor: AppColors.primary,
+          onChanged: (val) async {
+            await ThemeService().setDarkMode(val);
+            setState(() {});
+          },
+        ),
+        onTap: () async {
+          await ThemeService().toggleDarkMode();
+          setState(() {});
+        },
+      ),
+    );
+  }
   
   void _showAccountInfo(BuildContext context) {
     final authService = AuthService();
@@ -363,7 +436,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Data berhasil dihapus'),
-                  backgroundColor: Colors.green,
+                  backgroundColor: Color.fromRGBO(76, 158, 175, 1),
                 ),
               );
             },
@@ -609,9 +682,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => const AuthScreen()),
                 (route) => false,
               );
+              
+              // Exit app after logout
+              Future.delayed(const Duration(seconds: 1), () {
+                SystemNavigator.pop();
+              });
             },
             style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+              foregroundColor: AppColors.danger,
             ),
             child: const Text('Keluar'),
           ),
